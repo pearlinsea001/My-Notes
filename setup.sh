@@ -268,4 +268,29 @@ subprojects {
 EOF
 fi
 
+# ---- Skip the release lint checks (they crash on plugins with the Android 36 override) ----
+if [ -f android/build.gradle.kts ]; then
+cat >> android/build.gradle.kts <<'EOF'
+
+subprojects {
+    tasks.configureEach {
+        if (name.startsWith("lintVital") || name.startsWith("lintAnalyze")) {
+            enabled = false
+        }
+    }
+}
+EOF
+elif [ -f android/build.gradle ]; then
+cat >> android/build.gradle <<'EOF'
+
+subprojects {
+    tasks.configureEach { task ->
+        if (task.name.startsWith('lintVital') || task.name.startsWith('lintAnalyze')) {
+            task.enabled = false
+        }
+    }
+}
+EOF
+fi
+
 flutter pub get
